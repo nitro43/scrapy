@@ -11,8 +11,16 @@ class Headers(CaselessDict):
         super().__init__(seq)
 
     def normkey(self, key):
-        """Normalize key to bytes"""
-        return self._tobytes(key.title())
+        """Normalize key to bytes
+        Prevent titling for key contains API substring.
+        By default Scrapy converts all keys to title,
+        API requires the title of the last part in uppercase
+        e.g. X-Something-API
+        """
+        if isinstance(key, str):
+            return self._tobytes(key) if 'API' in key else self._tobytes(key.title())
+        else:
+            return self._tobytes(key) if b'API' in key else self._tobytes(key.title())
 
     def normvalue(self, value):
         """Normalize values to bytes"""
